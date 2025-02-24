@@ -39,15 +39,9 @@ export function galleryTemplate(images) {
     .join("");
 }
 
-export function renderGallery(images, tagGallery) {
+export function renderGallery(images) {
   const markup = galleryTemplate(images);
-  tagGallery.innerHTML = markup;
-  const refreshPage = new SimpleLightbox('.gallery a', {
-    captions: true,
-    captionsData: 'alt',
-    captionDelay: 250,
-  });
-  refreshPage.refresh();
+  return markup;
 }
 
 

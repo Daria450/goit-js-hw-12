@@ -46,7 +46,8 @@
   border: 1px solid #4e75ff;
 }
 
-.search-button {
+.search-button,
+.load {
   border-radius: 8px;
   padding: 8px 16px;
   height: 40px;
@@ -60,8 +61,14 @@
   color: #fff;
 }
 
-.search-button:hover {
+.search-button:hover,
+.load:hover {
   background: #6c8cff;
+}
+
+.load {
+  margin: 0 auto;
+  ;
 }
 
 .gallery {
@@ -112,6 +119,16 @@
 
 .data-value {
   font-weight: 400;
+}
+
+.no-results {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 150%;
+  letter-spacing: 0.04em;
+  color: #2e2f42;
+  margin-bottom: 60px;
 }
 
 /*-------------Loader----------------------*/

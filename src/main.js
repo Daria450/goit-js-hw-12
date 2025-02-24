@@ -9,26 +9,37 @@ import "simplelightbox/dist/simple-lightbox.min.css";
 import { renderGallery } from "./js/render-functions";
 import { searchImages } from "./js/pixabay-api";
 
-export const refs = {
+const refs = {
   searchForm: document.querySelector(".search-form"),
   searchInput: document.querySelector(".request"),
   searchBtn: document.querySelector(".search-button"),
   gallery: document.querySelector(".gallery"),
   loader: document.querySelector(".loader"),
+  loadBtn: document.querySelector(".load"),
 }
-
+const refreshPage = new SimpleLightbox('.gallery a', {
+  captions: true,
+  captionsData: 'alt',
+  captionDelay: 250,
+});
 
 refs.loader.style.display = 'none';
+refs.loadBtn.style.display = 'none';
+const queryParams = {
+  query: '',
+  page: 1,
+  total: 40,
+}
 
-refs.searchForm.addEventListener('submit', (e) => {
+refs.searchForm.addEventListener('submit', async (e) => {
 
   e.preventDefault();
+  queryParams.query = e.target.elements.query.value.trim();
+  queryParams.page = 1;
 
-  let userValue = e.target.elements.query.value.trim();
 
 
-
-  if (!userValue) {
+  if (!queryParams.query) {
     iziToast.error({
       title: 'Error',
       messageColor: 'white',
@@ -43,10 +54,12 @@ refs.searchForm.addEventListener('submit', (e) => {
 
   refs.loader.style.display = 'inline-block';
 
-  searchImages(userValue).then(res => {
-    refs.loader.style.display = 'none';
-    const img = res.data.hits;
 
+
+  try {
+    const res = await searchImages(queryParams.query, queryParams.page);
+    const img = res.data.hits;
+    refs.loader.style.display = 'none';
     if (res.data.hits.length === 0) {
       iziToast.error({
         title: 'Error',
@@ -60,21 +73,18 @@ refs.searchForm.addEventListener('submit', (e) => {
         theme: "dark",
       });
     } else {
-      renderGallery(img, refs.gallery);
-      e.target.reset();
+      const markup = renderGallery(img);
+      refs.gallery.innerHTML = markup;
+      refreshPage.refresh();
+      refs.loadBtn.style.display = 'block';
     }
-
-
-
-
-
-  }).catch((err) => {
+  } catch (err) {
     refs.loader.style.display = 'none';
     iziToast.error({
       title: 'Error',
       titleColor: 'white',
       messageColor: 'white',
-      message: `Sorry, unexpected ${err} occured!`,
+      message: `Sorry, unexpected error:${err} occured!`,
       position: 'topRight',
       backgroundColor: '#EF4040',
       iconColor: 'white',
@@ -82,13 +92,63 @@ refs.searchForm.addEventListener('submit', (e) => {
       theme: "dark",
     });
   }
-  );
-
-
-
+  e.target.reset();
 }
 )
 
 
+refs.loadBtn.addEventListener('click', loadMore);
 
+async function loadMore() {
+  queryParams.page += 1;
 
+  try {
+    const res = await searchImages(queryParams.query, queryParams.page);
+
+    const img = res.data.hits;
+    refs.loader.style.display = 'none';
+    const markup = renderGallery(img);
+    refs.gallery.insertAdjacentHTML("beforeend", markup);
+    refreshPage.refresh();
+
+    queryParams.total = res.data.total;
+    checkBtnStatus()
+  } catch (err) {
+    refs.loader.style.display = 'none';
+    iziToast.error({
+      title: 'Error',
+      titleColor: 'white',
+      messageColor: 'white',
+      message: `Sorry, unexpected error:${err} occured!`,
+      position: 'topRight',
+      backgroundColor: '#EF4040',
+      iconColor: 'white',
+      overlayColor: '#EF4040',
+      theme: "dark",
+    });
+  }
+}
+
+function checkBtnStatus() {
+  const perPage = 40;
+  const maxPage = Math.ceil(queryParams.total / perPage);
+
+  if (queryParams.page >= maxPage) {
+    refs.loadBtn.style.display = "none";
+    refs.gallery.insertAdjacentHTML("afterend", "<p class='no-results'>We're sorry, but you've reached the end of search results.</p>")
+  }
+  else {
+    refs.loadBtn.style.display = "block";
+  }
+  scrollDown();
+}
+
+function scrollDown() {
+  const card = document.querySelector('.gallery li');
+  const cardHeight = card.getBoundingClientRect().height;
+  window.scrollBy({
+    top: cardHeight * 2,
+    behavior: 'smooth',
+  })
+
+}
