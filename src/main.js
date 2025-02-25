@@ -16,6 +16,7 @@ const refs = {
   gallery: document.querySelector(".gallery"),
   loader: document.querySelector(".loader"),
   loadBtn: document.querySelector(".load"),
+  noResults: document.querySelector(".no-results")
 }
 const refreshPage = new SimpleLightbox('.gallery a', {
   captions: true,
@@ -25,6 +26,8 @@ const refreshPage = new SimpleLightbox('.gallery a', {
 
 refs.loader.style.display = 'none';
 refs.loadBtn.style.display = 'none';
+refs.noResults.style.display = 'none';
+
 const queryParams = {
   query: '',
   page: 1,
@@ -77,6 +80,9 @@ refs.searchForm.addEventListener('submit', async (e) => {
       refs.gallery.innerHTML = markup;
       refreshPage.refresh();
       refs.loadBtn.style.display = 'block';
+
+      queryParams.total = res.data.total;
+      checkBtnStatus()
     }
   } catch (err) {
     refs.loader.style.display = 'none';
@@ -100,6 +106,8 @@ refs.searchForm.addEventListener('submit', async (e) => {
 refs.loadBtn.addEventListener('click', loadMore);
 
 async function loadMore() {
+  refs.loader.style.display = 'block';
+  refs.loadBtn.style.display = "none";
   queryParams.page += 1;
 
   try {
@@ -112,7 +120,8 @@ async function loadMore() {
     refreshPage.refresh();
 
     queryParams.total = res.data.total;
-    checkBtnStatus()
+    checkBtnStatus();
+
   } catch (err) {
     refs.loader.style.display = 'none';
     iziToast.error({
@@ -135,12 +144,12 @@ function checkBtnStatus() {
 
   if (queryParams.page >= maxPage) {
     refs.loadBtn.style.display = "none";
-    refs.gallery.insertAdjacentHTML("afterend", "<p class='no-results'>We're sorry, but you've reached the end of search results.</p>")
+    refs.noResults.style.display = 'block';
   }
   else {
     refs.loadBtn.style.display = "block";
   }
-  scrollDown();
+  // scrollDown();
 }
 
 function scrollDown() {
