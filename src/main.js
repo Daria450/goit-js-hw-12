@@ -149,7 +149,7 @@ function checkBtnStatus() {
   else {
     refs.loadBtn.style.display = "block";
   }
-  // scrollDown();
+  scrollDown();
 }
 
 function scrollDown() {
