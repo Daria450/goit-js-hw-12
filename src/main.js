@@ -37,6 +37,9 @@ const queryParams = {
 refs.searchForm.addEventListener('submit', async (e) => {
 
   e.preventDefault();
+
+  refs.noResults.style.display = 'none';
+
   queryParams.query = e.target.elements.query.value.trim();
   queryParams.page = 1;
 
@@ -86,6 +89,7 @@ refs.searchForm.addEventListener('submit', async (e) => {
     }
   } catch (err) {
     refs.loader.style.display = 'none';
+    refs.gallery.innerHTML = " ";
     iziToast.error({
       title: 'Error',
       titleColor: 'white',
@@ -121,9 +125,10 @@ async function loadMore() {
 
     queryParams.total = res.data.total;
     checkBtnStatus();
-
+    scrollDown();
   } catch (err) {
     refs.loader.style.display = 'none';
+    refs.gallery.innerHTML = " ";
     iziToast.error({
       title: 'Error',
       titleColor: 'white',
@@ -149,7 +154,7 @@ function checkBtnStatus() {
   else {
     refs.loadBtn.style.display = "block";
   }
-  scrollDown();
+
 }
 
 function scrollDown() {
